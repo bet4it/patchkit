@@ -13,7 +13,7 @@ STUB_PRAGMA_POP = r'''
 #pragma GCC diagnostic pop
 '''
 
-func_re_1 = r'^(?P<all>(?P<desc>[^\s].+?(?P<name>%s)(?P<args>\(.*?\)))\s*{(?P<body>(.|\n)+?)^})$'
+func_re_1 = r'^(?P<all>(?P<desc>\S.+?\b(?P<name>%s)(?P<args>\(.*?\)))\s*{(?P<body>(.|\n)+?)^})$'
 
 class Decl:
     def __init__(self, syms, source, headers):
@@ -90,11 +90,10 @@ class Linker:
             self.declare(symbols={name: func['desc']}, source=func['all'])
 
     def autodecl(self, src):
-        syms = [m[2] for m in re.findall(func_re_1 % '\w+', src, re.MULTILINE)]
-
-        for name in syms:
-            func = self.getfunc(src, name)
-            self.declare(symbols={name: func['desc']}, source=func['all'])
+        pat = re.compile(func_re_1 % '\w+', re.MULTILINE)
+        for m in pat.finditer(src):
+            func = m.groupdict()
+            self.declare(symbols={func['name']: func['desc']}, source=func['all'])
 
     # link-time logic
     def inject(self, sym):
