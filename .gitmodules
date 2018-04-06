@@ -1,0 +1,3 @@
+[submodule "util/stdlib/lib43"]
+	path = util/stdlib/lib43
+	url = https://github.com/bet4it/lib43.git
