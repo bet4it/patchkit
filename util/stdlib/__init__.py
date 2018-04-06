@@ -15,4 +15,5 @@ def declare(linker):
         linker.autodecl(read('stdlib/lib43/src/io.c'))
         linker.autodecl(read('stdlib/lib43/src/mem.c'))
         linker.autodecl(read('stdlib/lib43/src/string.c'))
+        linker.autodecl(read('stdlib/lib43/src/syscall.c'))
         linker.autodecl(read('stdlib/lib43/src/syscalls.c'))
