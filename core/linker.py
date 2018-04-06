@@ -16,11 +16,12 @@ STUB_PRAGMA_POP = r'''
 func_re_1 = r'^(?P<all>(?P<desc>\S.+?\b(?P<name>%s)(?P<args>\(.*?\)))\s*{(?P<body>(.|\n)+?)^})$'
 
 class Decl:
-    def __init__(self, syms, source, headers):
+    def __init__(self, syms, source, headers, isasm):
         self.syms = syms or {}
         self.source = source
         self._headers = headers
         self.cflags = []
+        self.isasm = isasm
 
     @property
     def headers(self):
@@ -36,7 +37,10 @@ class Decl:
                 pt.info('[LINK] %s (includes [%s])' % (sym, ', '.join(self.syms.keys())))
             else:
                 pt.info('[LINK] %s' % sym)
-            asm = compiler.compile(self.source, linker, syms=self.syms.keys())
+            if self.isasm:
+                asm = self.source
+            else:
+                asm = compiler.compile(self.source, linker, syms=self.syms.keys())
 
             table = '\n'.join([pt.arch.jmp('_' + sym) for sym in self.syms.keys()])
             sep = 'PATCHKITJMPTABLE'
@@ -70,8 +74,8 @@ class Linker:
         self.post_hooks.append(cb)
 
     # symbol declaration helpers
-    def declare(self, symbols=None, source='', headers=''):
-        decl = Decl(symbols, source, headers)
+    def declare(self, symbols=None, source='', headers='', isasm=False):
+        decl = Decl(symbols, source, headers, isasm)
         self.decls.append(decl)
         if symbols:
             for sym, desc in symbols.items():
